@@ -2,9 +2,9 @@ name: Apk Builder CI
 
 on:
   push:
-    branches: [ main-d8 ]
+    branches: [ master-d8 ]
   pull_request:
-    branches: [ main-d8 ]
+    branches: [ master-d8 ]
 
 jobs:
   build:
