@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId "com.xiaoyv.javaengine"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 32
         versionCode 1
         versionName "1.0"
