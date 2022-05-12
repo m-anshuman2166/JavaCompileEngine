@@ -39,13 +39,13 @@ class CompileActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 
     private fun initEvent() {
-        binding.toolbar.menu.add("输入示例")
+        binding.toolbar.menu.add("input example")
             .setOnMenuItemClickListener {
                 setInputSample()
                 true
             }.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
 
-        binding.toolbar.menu.add("输出示例")
+        binding.toolbar.menu.add("output example")
             .setOnMenuItemClickListener {
                 setOutputSample()
                 true
@@ -63,54 +63,58 @@ class CompileActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private fun formatCode() {
         val codeText = binding.codeText.text.toString()
+        try{
         val formatSource = Formatter(JavaFormatterOptions.builder()
             .style(JavaFormatterOptions.Style.AOSP)
             .build())
             .formatSource(codeText)
         binding.codeText.setText(formatSource)
+        }catch(e: Exception){
+            Toast.makeText(CompileActivity.this, e.message,Toast.LENGTH_SHORT).show() 
+        }
     }
 
     /**
-     * [JavaEngine.CompileExceptionHandler] 为内部编译相关的协程作用域 默认异常捕获实现。
-     *
-     * - 你可以自定义获取整个流程抛出的异常信息
-     */
+      * [JavaEngine.CompileExceptionHandler] Default exception catch implementation for internal compilation related coroutine scope.
+      *
+      * - You can customize the exception information thrown by the whole process
+      */
     private fun runProgram() = launch(JavaEngine.CompileExceptionHandler) {
         binding.printView.text = null
 
-        // build 文件夹
+        // build folder
         val buildDir = PathUtils.getExternalAppFilesPath() + "/SingleExample/build"
 
-        // java 文件夹
+        // java folder
         val javaDir = PathUtils.getExternalAppFilesPath() + "/SingleExample/java"
 
-        // 待编译的 Main.java
+        // Main.java to be compiled
         val javaFilePath = withContext(Dispatchers.IO) {
-            // java 文件夹内 Main.java 文件，写入代码内容
+            // Main.java file in the java folder, write the code content
             val javaFilePath = "$javaDir/Main.java"
 
             FileIOUtils.writeFileFromString(javaFilePath, binding.codeText.text.toString())
 
-            // 返回源文件路径
+            // return the source file path
             javaFilePath
         }
 
-        // 编译 class，libFolder 为第三方 jar 存放目录，没有传空即可
-        // 编译完成返回目标 classes.jar，内部通过协程在 IO 线程处理的
+       // Compile the class, libFolder is the storage directory for the third-party jar, it can be left empty
+       // After the compilation is completed, return the target classes.jar, which is internally processed by the coroutine in the IO thread
         val compileJar: File = JavaEngine.classCompiler.compile(
             sourceFileOrDir = javaFilePath,
             buildDir = buildDir,
             libFolder = null
         ) { taskName, progress ->
 
-            // 这里是进度，回调在主线程...
+            // here is the progress, the callback is on the main thread...
             binding.printView.append(String.format("%3d%% Compiling: %s\n", progress, taskName))
         }
         binding.printView.append("Compiling class success!\n\n")
 
         binding.printView.append("Compiling dex start...\n")
 
-        // 编译 classes.dex，这一步相关的信息通过 System.xxx.print 输出
+        // Compile classes.dex, the information related to this step is output through System.xxx.print
         val dexFile = JavaEngine.dexCompiler.compile(compileJar.absolutePath, buildDir)
 
         binding.printView.append("Compiling dex success!\n\n")
@@ -121,15 +125,15 @@ class CompileActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         val programConsole = JavaEngine.javaProgram.run(dexFile, arrayOf("args"),
             chooseMainClassToRun = { classes, continuation ->
                 val dialog = AlertDialog.Builder(this@CompileActivity)
-                    .setTitle("请选择一个主函数运行")
+                    .setTitle("Please select a main function to run")
                     .setItems(classes.toTypedArray()) { p0, p1 ->
                         p0.dismiss()
                         continuation.resume(classes[p1])
                     }
                     .setCancelable(false)
-                    .setNegativeButton("取消") { d, v ->
+                    .setNegativeButton("Cancel") { d, v ->
                         d.dismiss()
-                        continuation.resumeWithException(Exception("取消操作"))
+                        continuation.resumeWithException(Exception("Cancel the operation"))
                     }.create()
 
                 dialog.show()
