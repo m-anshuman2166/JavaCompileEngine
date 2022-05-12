@@ -70,7 +70,7 @@ class CompileActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             .formatSource(codeText)
         binding.codeText.setText(formatSource)
         }catch(e: Exception){
-            Toast.makeText(CompileActivity.this, e.message,Toast.LENGTH_SHORT).show() 
+            Toast.makeText(this@CompileActivity, e.message,Toast.LENGTH_SHORT).show() 
         }
     }
 
