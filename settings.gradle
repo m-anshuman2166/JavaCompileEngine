@@ -33,12 +33,12 @@ dependencyResolutionManagement {
         maven {
             url 'https://jitpack.io'
         }
+        maven {
+            url 'https://repo1.maven.org/maven2/'
+        }
         gradlePluginPortal()
         google()
     }
 }
 rootProject.name='JavaCompileEngine'
 include ':app'
-include ':compiler-d8'
-include ':compiler-format'
-include ':compiler-jdk8'
