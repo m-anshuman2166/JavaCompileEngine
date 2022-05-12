@@ -48,7 +48,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:text="Java Engine D8 示例程序（支持 JDK8）"
+                    android:text="Java Engine D8 sample program (supports JDK8)"
                     android:textColor="#333333"
                     android:textSize="18sp"
                     android:textStyle="bold"
