@@ -1,29 +1,28 @@
+# JavaCompileEngine (supports JDK8 syntax)
 
-# JavaCompileEngine （支持 JDK8 语法）
+[![Mavnen Central](https://img.shields.io/maven-central/v/io.github.xiaoyvyv/compiler-d8?label=Maven%20Central)](https://search.maven.org /search?q=io.github.xiaoyvyv%20compiler-d8)
 
-[![Mavnen Central](https://img.shields.io/maven-central/v/io.github.xiaoyvyv/compiler-d8?label=Maven%20Central)](https://search.maven.org/search?q=io.github.xiaoyvyv%20compiler-d8)
+This is an engine that can compile and run `Java` code on the `Android` platform, and supports `JDK8` syntax to compile and run.
 
-这是一个能够在 `Android` 平台上面编译和运行 `Java` 代码的引擎，支持 `JDK8` 语法编译运行。
+#### How it works:
 
-#### 运行原理：
-
-> 1、将 `*.java` 文件编译为 `*.class` 类文件。
-> 2、通过 `Google` 的 `R8 | D8` 工具将 `*.class` 文件编译为 `Android` 平台能够运行的 `*.dex` 文件。这一步可以脱糖，可以在安卓平台运行 `JDK` 高版本的语法糖，其内部实现基本上还是语法糖转换成了低版本兼容的代码。
-> 3、将 `*.dex` 文件通过 `DexClassLoader` 加载到应用程序中，并寻找 `main` 方法反射调用。
-> 4、代理系统的输入`System.in` 和输出 `System.out` 。
+> 1. Compile `*.java` files into `*.class` class files.
+> 2. Use the `R8 | D8` tool of `Google` to compile the `*.class` file into a `*.dex` file that can run on the `Android` platform. This step can be de-sugared, and the higher version of `JDK` syntactic sugar can be run on the Android platform, and its internal implementation is basically the conversion of syntactic sugar into low-version compatible code.
+> 3. Load the `*.dex` file into the application through `DexClassLoader`, and look for the `main` method reflection call.
+> 4. Proxy system input `System.in` and output `System.out`.
 
 
-## 示例下载
+## Sample download
 [JavaEngineDemo](app_image/demo.apk?raw=true)
 
-## 截图预览
-|   |   |   |
+## Screenshot preview
+| | | |
 |:--|:--|:--|
-|  ![截图预览](app_image/1.jpg?raw=true) |![截图预览](app_image/2.jpg?raw=true)   | ![截图预览](app_image/3.jpg?raw=true)  |
+| ![Screenshot preview](app_image/1.jpg?raw=true) |![Screenshot preview](app_image/2.jpg?raw=true) | ![Screenshot preview](app_image/3.jpg?raw=true ) |
 
-## 1、引入依赖
-第一步：在`Project`的`build.gradle`内添加`jitpack.io`仓库
-```groovy
+## 1. Import dependencies
+Step 1: Add the `jitpack.io` repository in the `build.gradle` of `Project`
+````groovy
     allprojects {
         repositories {
             //...
@@ -31,19 +30,19 @@
             mavenCentral()
         }
     }
-```
-第二步：添加依赖
-```groovy
+````
+Step 2: Add dependencies
+````groovy
     dependencies {
         //...
 
-        // 这个依赖比较大（9M 左右），因为内部（assets）包含了一个精简的 Jre，你可以自己选择去除或精简。
+        // This dependency is relatively large (about 9M), because the internal (assets) contains a simplified Jre, you can choose to remove or simplify.
         implementation 'io.github.xiaoyvyv:compiler-d8:<maven-version>'
     }
-```
+````
 
-## 2、初始化
-在你的 `Application` 的 `onCreate` 中初始化库。
+## 2. Initialization
+Initialize the library in `onCreate` of your `Application`.
 
 ```kotlin
 class App : Application() {
@@ -51,67 +50,67 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         
-        // init
+        //init
         JavaEngine.init(this)
     }
 }
-```
+````
 
-## 3、编译 Java 文件
-`JavaClassCompiler` 提供了相关的方法，具体请查阅 [JavaClassCompiler.kt](https://github.com/xiaoyvyv/JavaCompileEngine/blob/master-d8/compiler-d8/src/main/java/com/xiaoyv/java/compiler/tools/java/JavaClassCompiler.kt)。
+## 3. Compile Java files
+`JavaClassCompiler` provides related methods, please refer to [JavaClassCompiler.kt](https://github.com/xiaoyvyv/JavaCompileEngine/blob/master-d8/compiler-d8/src/main/java/com/xiaoyv/ java/compiler/tools/java/JavaClassCompiler.kt).
 
-> 注意该方法需要配合协程使用，在协程的作用域内调用
+> Note that this method needs to be used with coroutines and is called within the scope of coroutines
 
 ```kotlin
-// 编译 class，libFolder 为第三方 jar 存放目录，没有传空即可
-// 编译完成返回目标 classes.jar，内部通过协程在 IO 线程处理的
+// Compile the class, libFolder is the storage directory for the third-party jar, it can be left empty
+// After the compilation is completed, return the target classes.jar, which is internally processed by the coroutine in the IO thread
 val compileJar: File = JavaEngine.classCompiler.compile(
     sourceFileOrDir = javaFilePath,
     buildDir = buildDir,
     libFolder = null
 ) { taskName, progress ->
 
-   // 这里是进度，回调在主线程...
+   // here is the progress, the callback is on the main thread...
   }
-```
-## 4、转换 class文件 到 dex文件
-`DexCompiler` 提供了相关的方法，具体请查阅 [JavaDexCompiler.kt](https://github.com/xiaoyvyv/JavaCompileEngine/blob/master-d8/compiler-d8/src/main/java/com/xiaoyv/java/compiler/tools/dex/JavaDexCompiler.kt)
+````
+## 4. Convert class file to dex file
+`DexCompiler` provides related methods, please refer to [JavaDexCompiler.kt](https://github.com/xiaoyvyv/JavaCompileEngine/blob/master-d8/compiler-d8/src/main/java/com/xiaoyv/ java/compiler/tools/dex/JavaDexCompiler.kt)
 
-> 注意该方法需要配合协程使用，在协程的作用域内调用
+> Note that this method needs to be used with coroutines and is called within the scope of coroutines
 
 ```kotlin
-// 编译 classes.dex，这一步相关的信息通过 System.xxx.print 输出
+// Compile classes.dex, the information related to this step is output through System.xxx.print
 val dexFile = JavaEngine.dexCompiler.compile(compileJar.absolutePath, buildDir)
-```
-## 5、运行 dex文件
-`JavaProgram.kt` 提供了相关的方法，具体请查阅 [JavaProgram.kt](https://github.com/xiaoyvyv/JavaCompileEngine/blob/master-d8/compiler-d8/src/main/java/com/xiaoyv/java/compiler/tools/exec/JavaProgram.kt)
+````
+## 5. Run the dex file
+`JavaProgram.kt` provides related methods, please refer to [JavaProgram.kt](https://github.com/xiaoyvyv/JavaCompileEngine/blob/master-d8/compiler-d8/src/main/java/com/ xiaoyv/java/compiler/tools/exec/JavaProgram.kt)
 
-注意 `chooseMainClassToRun` 默认实现是选中匹配到的第一个 `main` 方法进行运行，你可以自己在该方法回调内去选择需要执行的的指定某个类。
-- chooseMainClassToRun 第一个回调参数：匹配到的包含 `main` 方法的类
-- chooseMainClassToRun 第二个回调参数：协程相关的回调，需要将选择的类回调回去
+Note that the default implementation of `chooseMainClassToRun` is to select the first `main` method that matches to run. You can choose a specific class to be executed in the method callback.
+- chooseMainClassToRun The first callback parameter: the matched class containing the `main` method
+- chooseMainClassToRun The second callback parameter: the callback related to the coroutine, you need to call back the selected class
 
-<font color="#ff0000">注意：chooseMainClassToRun 回调会使内部协程一直挂起，你应该及时的通过 continuation.resume() 或 resume.resumeWithException() 让内部知道处理结果，禁止忽略 continuation 的回调，否则会在后台一直占用资源</font>
+<font color="#ff0000">Note: The chooseMainClassToRun callback will make the internal coroutine suspend all the time. You should let the internal know the processing result through continuation.resume() or resume.resumeWithException() in time. It is forbidden to ignore the continuation callback. Otherwise, resources will always be occupied in the background</font>
 
-`chooseMainClassToRun`、`printOut`、`printErr` 回调均在主线程，可以进行 UI 操作。
+The `chooseMainClassToRun`, `printOut`, and `printErr` callbacks are all on the main thread and can be used for UI operations.
 
-`run` 方法运行完成（并不代表程序执行完成，例如你的代码启动了其他线程）会返回一个 `programConsole` 句柄，可以用于关闭输入输出流。
+The completion of the `run` method (does not mean that the program execution is complete, for example your code starts another thread) will return a `programConsole` handle, which can be used to close the input and output streams.
 
-> 注意该方法需要配合协程使用，在协程的作用域内调用
+> Note that this method needs to be used with coroutines and is called within the scope of coroutines
 
 ```kotlin
-// JavaEngine.
+//JavaEngine.
 val programConsole = JavaEngine.javaProgram.run(dexFile, arrayOf("args"),
     chooseMainClassToRun = { classes, continuation ->
         val dialog = AlertDialog.Builder(this@CompileActivity)
-            .setTitle("请选择一个主函数运行")
+            .setTitle("Please select a main function to run")
             .setItems(classes.toTypedArray()) { p0, p1 ->
                 p0.dismiss()
                 continuation.resume(classes[p1])
             }
             .setCancelable(false)
-            .setNegativeButton("取消") { d, v ->
+            .setNegativeButton("Cancel") { d, v ->
                 d.dismiss()
-                continuation.resumeWithException(Exception("取消操作"))
+                continuation.resumeWithException(Exception("Cancel operation"))
             }.create()
 
         dialog.show()
@@ -123,20 +122,17 @@ val programConsole = JavaEngine.javaProgram.run(dexFile, arrayOf("args"),
     printErr = {
         binding.printView.append(it)
     })
-```
-## 6、输入数据 如 Scanner等等的处理
-直接调用 `programConsole.` 的 `inputStdin(String stdin)` 方法即可输入数据。
+````
+## 6. Processing of input data such as Scanner, etc.
+Data can be entered by directly calling the `inputStdin(String stdin)` method of `programConsole.`.
 ```kotlin
     programConsole.inputStdin(str)
-```
-## 7、编译相关设置
-`JavaEngine.compilerSetting` 提供了相关配置。[JavaEngineSetting.kt](https://github.com/xiaoyvyv/JavaCompileEngine/blob/master-d8/compiler-d8/src/main/java/com/xiaoyv/java/compiler/JavaEngineSetting.kt)
+````
+## 7. Compile related settings
+`JavaEngine.compilerSetting` provides related configuration. [JavaEngineSetting.kt](https://github.com/xiaoyvyv/JavaCompileEngine/blob/master-d8/compiler-d8/src/main/java/com/xiaoyv/java/compiler/JavaEngineSetting.kt)
 
-## 8、问题
-更多内容请查阅 [Demo](https://github.com/xiaoyvyv/JavaCompileEngine/tree/master/app) 和源码 [compiler-d8](https://github.com/xiaoyvyv/JavaCompileEngine/tree/master/compiler-d8/)
+## 8. Questions
+For more information, please refer to [Demo](https://github.com/xiaoyvyv/JavaCompileEngine/tree/master/app) and source code [compiler-d8](https://github.com/xiaoyvyv/JavaCompileEngine/tree/master /compiler-d8/)
 
-## 9、反馈
-QQEmail：1223414335@qq.com
-
-
-
+## 9. Feedback
+QQEmail: 1223414335@qq.com
