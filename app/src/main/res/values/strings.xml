@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">JavaCompileEngine</string>
-    <string name="app_principle">How it works：\n\n1、Compile *.java files to *.class class files.\n2、The *.class file is compiled into a *.dex file that can be run by the Android platform through Google's R8 | D8 tool. This step can be de-sugared, and the high-version JDK syntactic sugar can be run on the Android platform. The internal implementation is basically still the syntactic sugar converted into low-version compatible code. \n3. Load the *.dex file into the application through DexClassLoader, and look for the main method reflection call. \n4. Input System.in and output of the proxy system System.out .</string>
+    <string name="app_principle">Java compiler app with Jdk 8 and d8</string>
 </resources>
 
